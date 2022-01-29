@@ -1,11 +1,12 @@
 class collectionList {
-  String amount;
+  num amount;
+  String collector;
   String createdAt;
   String docType;
-  String gold;
+  num gold;
   String id;
   String mode;
-  int otp;
+  String otp;
   String paymentId;
   String status;
   String updatedAt;
@@ -13,6 +14,7 @@ class collectionList {
 
   collectionList(
       {this.amount,
+      this.collector,
       this.createdAt,
       this.docType,
       this.gold,
@@ -26,6 +28,7 @@ class collectionList {
 
   collectionList.fromJson(Map<String, dynamic> json) {
     amount = json['amount'];
+    collector = json['collector'];
     createdAt = json['createdAt'];
     docType = json['docType'];
     gold = json['gold'];
@@ -41,6 +44,7 @@ class collectionList {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['amount'] = this.amount;
+    data['collector'] = this.collector;
     data['createdAt'] = this.createdAt;
     data['docType'] = this.docType;
     data['gold'] = this.gold;
