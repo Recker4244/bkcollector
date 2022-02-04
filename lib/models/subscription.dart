@@ -28,7 +28,7 @@ class Custom implements subscription {
   }
 
   userphone() {
-    return plan.user.mobile;
+    return plan.user.mobile != null ? plan.user.mobile : 0;
   }
 
   username() {
@@ -85,7 +85,7 @@ class Standard implements subscription {
   }
 
   userphone() {
-    return plan.user.mobile;
+    return plan.user.mobile != null ? plan.user.mobile : 0;
   }
 
   username() {
@@ -93,7 +93,7 @@ class Standard implements subscription {
   }
 
   createdAt() {
-    return plan.createdAt;
+    return plan.createdAt.toString();
   }
 
   unpaidSkips() {

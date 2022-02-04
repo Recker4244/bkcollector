@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gold247/models/collectionList.dart';
 import 'package:gold247/models/referral.dart';
+import 'package:gold247/models/subPlan.dart';
 import 'package:gold247/models/subscription.dart';
 import 'package:gold247/language/locale.dart';
 import 'package:gold247/models/user.dart';
@@ -25,17 +26,21 @@ class Collectiondetails extends StatefulWidget {
 class CollectiondetailsState extends State<Collectiondetails> {
   Future<bool> init;
 
-  Future<subscription> fetchsubscription(String user, String id) async {
+  List<standardSub> temp = [];
+  fetchsubscription(String user, String id) async {
     var request = http.Request(
         'GET', Uri.parse('${baseurl}/api/subscription/user/${user}'));
 
     http.StreamedResponse response = await request.send();
 
     if (response.statusCode == 200) {
-      final responseString = await response.stream.bytesToString();
-      Map det = jsonDecode(responseString);
+      final responseString = json.decode(await response.stream.bytesToString());
+      Map det = responseString;
+
       List dat = det['data'];
-      List<subscription> subs = [];
+      Iterable l = det['data'];
+      temp =
+          List<standardSub>.from(l.map((model) => standardSub.fromJson(model)));
       for (int j = 0; j < dat.length; j++) {
         if (dat[j]['plan'] == null) {
           customSub sub = customSub.fromJson(dat[j]);
@@ -48,17 +53,15 @@ class CollectiondetailsState extends State<Collectiondetails> {
           }
         }
       }
-      print(subs);
+      //print(subs);
     } else {
       print(response.reasonPhrase);
     }
-
-    return temp;
   }
 
-  subscription temp;
   Future<bool> initialise() async {
-    temp = await fetchsubscription(widget.userid, widget.installment.id);
+    await fetchsubscription(widget.userid, widget.installment.id);
+    print("temp=$temp");
     return true;
   }
 
@@ -82,7 +85,7 @@ class CollectiondetailsState extends State<Collectiondetails> {
 
     if (response.statusCode == 200) {
       print(await response.stream.bytesToString());
-      await changeSub(temp.id());
+      await changeSub(temp[0].id);
     } else {
       print(response.reasonPhrase);
     }
@@ -189,6 +192,16 @@ class CollectiondetailsState extends State<Collectiondetails> {
 
   @override
   Widget build(BuildContext context) {
+    MaterialStateProperty<Color> getColor(Color white, Color pressed) {
+      final getColor = (Set<MaterialState> states) {
+        if (states.contains(MaterialState.pressed)) {
+          return pressed;
+        } else
+          return white;
+      };
+      return MaterialStateProperty.resolveWith(getColor);
+    }
+
     var locale = AppLocalizations.of(context);
     box2() {
       return Container(
@@ -281,7 +294,7 @@ class CollectiondetailsState extends State<Collectiondetails> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      "${temp.userphone()}",
+                      "${temp[0].user.mobile}",
                       //widget.temp.status().toUpperCase(),
                       style: TextStyle(
                         color: blackColor,
@@ -307,7 +320,7 @@ class CollectiondetailsState extends State<Collectiondetails> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      "${temp.username()}",
+                      "${temp[0].user.fname}",
                       style: TextStyle(
                         color: blackColor,
                         fontSize: 14,
@@ -357,7 +370,7 @@ class CollectiondetailsState extends State<Collectiondetails> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      "${temp.landmark()}",
+                      "${temp[0].user.addresses[0].landMark}",
                       style: TextStyle(
                         color: blackColor,
                         fontSize: 14,
@@ -382,7 +395,7 @@ class CollectiondetailsState extends State<Collectiondetails> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      "${temp.pincode()}",
+                      "${temp[0].user.addresses[0].pin}",
                       style: TextStyle(
                         color: blackColor,
                         fontSize: 14,
@@ -391,6 +404,100 @@ class CollectiondetailsState extends State<Collectiondetails> {
                   ),
                 ],
               ),
+              Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(fixPadding * 2),
+                    child: Theme(
+                      data: ThemeData(
+                        errorColor: primaryColor,
+                        primaryColor: whiteColor,
+                        textSelectionTheme: TextSelectionThemeData(
+                          cursorColor: primaryColor,
+                        ),
+                      ),
+                      child: TextFormField(
+                        controller: otp,
+                        onChanged: (value) {
+                          print(value);
+                        },
+                        textAlign: TextAlign.center,
+                        cursorColor: primaryColor,
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        keyboardType: TextInputType.number,
+                        style: primaryColor18BoldTextStyle,
+                        decoration: InputDecoration(
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: const BorderRadius.all(
+                              const Radius.circular(10.0),
+                            ),
+                            borderSide:
+                                BorderSide(color: primaryColor, width: 1),
+                          ),
+                          filled: true,
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: const BorderRadius.all(
+                              const Radius.circular(10.0),
+                            ),
+                            borderSide:
+                                BorderSide(color: primaryColor, width: 1),
+                          ),
+                          fillColor: whiteColor,
+                          labelText: "Enter Verification OTP",
+                          labelStyle: primaryColor16MediumTextStyle,
+                          border: OutlineInputBorder(
+                            borderSide:
+                                BorderSide(color: primaryColor, width: 0.7),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  // SizedBox(
+                  //   height: 2.h,
+                  // ),
+                  Padding(
+                    padding: const EdgeInsets.all(fixPadding * 2),
+                    child: ElevatedButton(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(18.0),
+                              child: Text(
+                                "verify to confirm",
+                                style: TextStyle(
+                                  fontFamily: 'Jost',
+                                  fontSize: 18.0.sp,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        style: ButtonStyle(
+                            shape: MaterialStateProperty.all<
+                                RoundedRectangleBorder>(RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            )),
+                            foregroundColor: getColor(whiteColor, primaryColor),
+                            backgroundColor:
+                                getColor(primaryColor, whiteColor)),
+                        onPressed: () async {
+                          String otpfromlist =
+                              temp[0].installments[0].otp.toString();
+                          if (otp.text == otpfromlist)
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text("otp verified"),
+                            ));
+                          //await getUser("s", "s");
+                          // Navigator.pushReplacement(
+                          //     context,
+                          //     MaterialPageRoute(
+                          //         builder: (context) => Appointments()));
+                        }),
+                  ),
+                ],
+              )
             ],
           ),
         ),
